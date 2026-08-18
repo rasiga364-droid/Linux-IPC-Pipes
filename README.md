@@ -22,7 +22,13 @@ Write the C Program using Linux Process API - pipe(), fifo()
 Testing the C Program for the desired output. 
 
 # PROGRAM:
+
+
+
+## C Program that illustrate communication between two process using unnamed pipes using Linux API system calls
+
 ```
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h> 
@@ -42,19 +48,19 @@ int main() {
     pid = fork(); 
 
     if (pid == 0) { 
-       
-        close(p1[1]); // Close write end of pipe1
-        close(p2[0]); // Close read end of pipe2
+        // Child process - Server
+        close(p1[1]); 
+        close(p2[0]); 
         server(p1[0], p2[1]); 
         exit(0);
     } 
 
     
     close(p1[0]); 
-    close(p2[1]);
+    close(p2[1]); 
     client(p1[1], p2[0]); 
     
-    wait(NULL);
+    wait(NULL); 
     return 0; 
 } 
 
@@ -63,11 +69,11 @@ void server(int rfd, int wfd) {
     char fname[2000]; 
     char buff[2000];
 
- 
+    // Read filename from pipe
     n = read(rfd, fname, 2000);
     fname[n] = '\0';
 
-    
+    // Open the file
     int fd = open(fname, O_RDONLY);
     if (fd < 0) { 
         write(wfd, "can't open", 9); 
@@ -83,21 +89,31 @@ void client(int wfd, int rfd) {
     char fname[2000];
     char buff[2000];
 
+   
     scanf("%s", fname);
 
-  
+    
     write(wfd, fname, 2000);
 
-   
+    
     n = read(rfd, buff, 2000);
     buff[n] = '\0';
 
+    
     write(1, buff, n);
 }
 ```
-## C Program that illustrate communication between two process using unnamed pipes using Linux API system calls
+![Alt text](imageex03/1.png)
+
+
+## OUTPUT
+
+
+
+## C Program that illustrate communication between two process using named pipes using Linux API system calls
 
 ```
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -115,17 +131,16 @@ void client();
 int main() {
     pid_t pid;
 
-    
+   
     mkfifo(FIFO_FILE, 0666);
 
-    pid = fork();  // Create a child process
-
+    pid = fork(); 
     if (pid > 0) {
-      
+        
         sleep(1);  // Ensure client is ready
         server();
     } else if (pid == 0) {
-       
+        
         client();
     } else {
         perror("Fork failed");
@@ -148,7 +163,7 @@ void server() {
         exit(EXIT_FAILURE);
     }
 
-  
+    // Open FIFO for writing
     fifo_fd = open(FIFO_FILE, O_WRONLY);
     if (fifo_fd == -1) {
         perror("Error opening FIFO");
@@ -164,11 +179,13 @@ void server() {
     close(fifo_fd);
 }
 
+
 void client() {
     int fifo_fd;
     char buffer[1024];
     ssize_t bytes_read;
 
+    
     fifo_fd = open(FIFO_FILE, O_RDONLY);
     if (fifo_fd == -1) {
         perror("Error opening FIFO");
@@ -183,18 +200,6 @@ void client() {
     close(fifo_fd);
 }
 ```
-
-
-
-## OUTPUT
-![Alt text](imageex03/1.png)
-
-
-## C Program that illustrate communication between two process using named pipes using Linux API system calls
-
-
-
-
 
 ## OUTPUT
 ![Alt text](imageex03/2.png)
